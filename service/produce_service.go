@@ -22,12 +22,12 @@ func (s *ProduceService) GetProduce() []*types.ProduceItem {
 	panic("not implemented")
 }
 
-func (s *ProduceService) CreateProduce() {
-
+func (s *ProduceService) CreateProduce() *types.ProduceItem {
+	panic("not implemented")
 }
 
-func (s *ProduceService) DeleteProduce() {
-
+func (s *ProduceService) DeleteProduce() bool {
+	panic("not implemented")
 }
 
 func NewProduceService() *ProduceService {
