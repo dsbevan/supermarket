@@ -1,35 +1,33 @@
 package service
 
 import (
-	"supermarket/types"
+	"supermarket/dao"
+	. "supermarket/types"
 )
 
-type ProduceGetter interface {
-	GetProduce()
-}
-
-type ProduceCreator interface {
-	CreateProduce()
-}
-
-type ProduceDeleter interface {
-	DeleteProduce()
-}
-
-type ProduceService struct{}
-
-func (s *ProduceService) GetProduce() []*types.ProduceItem {
-	panic("not implemented")
-}
-
-func (s *ProduceService) CreateProduce() *types.ProduceItem {
-	panic("not implemented")
-}
-
-func (s *ProduceService) DeleteProduce() bool {
-	panic("not implemented")
+type ProduceService struct {
+	produceInserter dao.ProduceInserter
+	produceGetter   dao.ProduceGetter
+	produceDeleter  dao.ProduceDeleter
 }
 
 func NewProduceService() *ProduceService {
-	return &ProduceService{}
+	dao := dao.NewProduceDao()
+	return &ProduceService{
+		produceGetter:   dao,
+		produceInserter: dao,
+		produceDeleter:  dao,
+	}
+}
+
+func (s *ProduceService) GetProduce() ([]*ProduceItem, error) {
+	panic("not implemented")
+}
+
+func (s *ProduceService) CreateProduce() (*ProduceItem, error) {
+	panic("not implemented")
+}
+
+func (s *ProduceService) DeleteProduce() (bool, error) {
+	panic("not implemented")
 }
