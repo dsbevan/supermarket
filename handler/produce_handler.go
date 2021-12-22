@@ -8,17 +8,17 @@ import (
 )
 
 type ProduceHandler struct {
-	produceGetter   service.ProduceGetter
-	produceInserter service.ProduceInserter
-	produceDeleter  service.ProduceDeleter
+	produceGetter  service.ProduceGetter
+	producePoster  service.ProducePoster
+	produceDeleter service.ProduceDeleter
 }
 
 func NewProduceHandler() *ProduceHandler {
 	svc := service.NewProduceService()
 	return &ProduceHandler{
-		produceGetter:   svc,
-		produceInserter: svc,
-		produceDeleter:  svc,
+		produceGetter:  svc,
+		producePoster:  svc,
+		produceDeleter: svc,
 	}
 }
 
@@ -41,7 +41,7 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		fmt.Fprintln(w, "in POST")
 
-		if res, err := h.produceInserter.InsertProduce(); err != nil {
+		if res, err := h.producePoster.PostProduce(); err != nil {
 			// Handle CreateProduce error
 		} else if res == nil {
 			// Item already exists

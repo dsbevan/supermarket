@@ -9,8 +9,8 @@ type ProduceGetter interface {
 
 // Inserts a produce item into storage.
 // Returns true if successful, else false.
-type ProduceInserter interface {
-	InsertProduce(item ProduceItem) bool
+type ProducePoster interface {
+	PostProduce(item ProduceItem) bool
 }
 
 // Deletes the produce item matching the given produce code.

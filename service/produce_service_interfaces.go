@@ -9,8 +9,8 @@ type ProduceGetter interface {
 }
 
 // Saves the given item, returning the item inserted if successful.
-type ProduceInserter interface {
-	InsertProduce(item *ProduceItem) (*ProduceItem, error)
+type ProducePoster interface {
+	PostProduce(item *ProduceItem) (*ProduceItem, error)
 }
 
 // Deletes the item with the given produce code.
