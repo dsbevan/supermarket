@@ -18,17 +18,16 @@ func NewProduceDao() *ProduceDao {
 // Implements dao.ProduceGetter
 // Gets all the produce items.
 // Returns a slice of produce item pointers.
-func (d *ProduceDao) GetProduce() []*ProduceItem {
-	// TODO get
-	panic("Not implemented")
+func (d *ProduceDao) GetProduce() []ProduceItem {
+	return d.produce
 }
 
 // Implements dao.ProducePoster
-// Inserts the passed ProduceItem into the storage array,
-// if there is space and the item does not already exist.
+// Inserts the passed ProduceItem into the storage array
+// if the item does not already exist.
 // Returns true if successful, else false.
 func (d *ProduceDao) PostProduce(item ProduceItem) bool {
-	// TODO insert
+	// TODO post
 	panic("Not implemented")
 }
 

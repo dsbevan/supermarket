@@ -5,7 +5,7 @@ import . "supermarket/types"
 // Gets all stored produce, returning the list of produce
 // and nil if successful.
 type ProduceGetter interface {
-	GetProduce() ([]*ProduceItem, error)
+	GetProduce() ([]ProduceItem, error)
 }
 
 // Saves the given item, returning the item inserted if successful.

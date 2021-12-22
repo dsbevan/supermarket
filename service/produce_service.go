@@ -21,7 +21,7 @@ func NewProduceService() *ProduceService {
 }
 
 // Implements service.ProduceGetter
-func (s *ProduceService) GetProduce() ([]*ProduceItem, error) {
+func (s *ProduceService) GetProduce() ([]ProduceItem, error) {
 	panic("not implemented")
 }
 

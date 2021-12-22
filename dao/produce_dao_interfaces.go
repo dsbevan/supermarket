@@ -4,7 +4,7 @@ import . "supermarket/types"
 
 // Returns slice of pointers to stored produce items.
 type ProduceGetter interface {
-	GetProduce() []*ProduceItem
+	GetProduce() []ProduceItem
 }
 
 // Inserts a produce item into storage.
