@@ -8,28 +8,28 @@ import (
 )
 
 type ProduceHandler struct {
-	produceGetter  service.ProduceGetter
-	produceCreator service.ProduceCreator
-	produceDeleter service.ProduceDeleter
+	produceGetter   service.ProduceGetter
+	produceInserter service.ProduceInserter
+	produceDeleter  service.ProduceDeleter
 }
 
 func NewProduceHandler() *ProduceHandler {
 	svc := service.NewProduceService()
 	return &ProduceHandler{
-		produceGetter:  svc,
-		produceCreator: svc,
-		produceDeleter: svc,
+		produceGetter:   svc,
+		produceInserter: svc,
+		produceDeleter:  svc,
 	}
 }
 
 // Handle /produce requests
-func (ph *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
+func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("in produce")
 	switch r.Method {
 	case "GET":
 		fmt.Fprintln(w, "in GET")
 
-		if res, err := ph.produceGetter.GetProduce(); err != nil {
+		if res, err := h.produceGetter.GetProduce(); err != nil {
 			// Handle or send error message
 		} else if jsn, err := json.Marshal(res); err != nil {
 			// Handle or send error message
@@ -41,7 +41,7 @@ func (ph *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) 
 	case "POST":
 		fmt.Fprintln(w, "in POST")
 
-		if res, err := ph.produceCreator.CreateProduce(); err != nil {
+		if res, err := h.produceInserter.InsertProduce(); err != nil {
 			// Handle CreateProduce error
 		} else if res == nil {
 			// Item already exists
@@ -55,7 +55,7 @@ func (ph *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) 
 	case "DELETE":
 		fmt.Fprintln(w, "in DELETE")
 
-		if deleted, err := ph.produceDeleter.DeleteProduce(); err != nil {
+		if deleted, err := h.produceDeleter.DeleteProduce(); err != nil {
 			// Handle DeleteProduce error
 		} else if deleted == false {
 			// Item did not exist

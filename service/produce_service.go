@@ -6,8 +6,8 @@ import (
 )
 
 type ProduceService struct {
-	produceInserter dao.ProduceInserter
 	produceGetter   dao.ProduceGetter
+	produceInserter dao.ProduceInserter
 	produceDeleter  dao.ProduceDeleter
 }
 
@@ -20,14 +20,17 @@ func NewProduceService() *ProduceService {
 	}
 }
 
+// Implements service.ProduceGetter
 func (s *ProduceService) GetProduce() ([]*ProduceItem, error) {
 	panic("not implemented")
 }
 
-func (s *ProduceService) CreateProduce() (*ProduceItem, error) {
+// Implements service.ProduceInserter
+func (s *ProduceService) InsertProduce(item *ProduceItem) (*ProduceItem, error) {
 	panic("not implemented")
 }
 
-func (s *ProduceService) DeleteProduce() (bool, error) {
+// Implements service.ProduceDeleter
+func (s *ProduceService) DeleteProduce(code string) (bool, error) {
 	panic("not implemented")
 }
