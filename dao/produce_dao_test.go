@@ -1,36 +1,12 @@
 package dao
 
 import (
+	"fmt"
 	. "supermarket/types"
 	"testing"
 )
 
-func contains(slice []ProduceItem, produce ProduceItem) bool {
-	for _, item := range slice {
-		if item.Name == produce.Name && item.Code == produce.Code && item.Price == produce.Price {
-			return true
-		}
-	}
-	return false
-}
-
-func equivalent(first []ProduceItem, second []ProduceItem) (bool, string) {
-	if len(first) != len(second) {
-		return false, "lengths differ"
-	}
-	for _, item := range first {
-		if !contains(second, item) {
-			return false, "contents differ"
-		}
-	}
-	for _, item := range second {
-		if !contains(first, item) {
-			return false, "contents differ"
-		}
-	}
-	return true, ""
-}
-
+// Test data
 var apple ProduceItem = ProduceItem{
 	Name:  "apple",
 	Code:  "SN3J-3398-2222-1111",
@@ -47,7 +23,7 @@ var orange ProduceItem = ProduceItem{
 	Price: 2.99,
 }
 
-func TestGetProduce(t *testing.T) {
+func TestDaoGetProduce(t *testing.T) {
 	largeSlice := make([]ProduceItem, 0, 20)
 	largeSlice = append(largeSlice, apple)
 	testcases := []struct {
@@ -72,18 +48,16 @@ func TestGetProduce(t *testing.T) {
 		dao := NewProduceDao()
 		dao.produce = test.storedProduce
 		produce := dao.GetProduce()
-		equal, msg := equivalent(produce, test.expected)
+		equal, msg := tEquivalent(produce, test.expected)
 		if !equal {
-			t.Errorf("Expected and actual %s", msg)
+			t.Errorf("Expected and actual produce array %s", msg)
 			t.Fail()
 		}
 	}
 }
 
-func TestPostProduce(t *testing.T) {
+func TestDaoPostProduce(t *testing.T) {
 	// Create data structures for tests
-	emptySlice := []ProduceItem{}
-	fullSlice := []ProduceItem{apple, pear}
 	partiallyFullSlice := make([]ProduceItem, 0, 10)
 	partiallyFullSlice = append(partiallyFullSlice, apple)
 	partiallyFullSlice = append(partiallyFullSlice, pear)
@@ -93,15 +67,15 @@ func TestPostProduce(t *testing.T) {
 		itemToAdd       ProduceItem
 		expected        []ProduceItem
 	}{
-		{ // Test add to empty array
-			initialContents: emptySlice,
+		{ // Test add to empty array (exceeding capacity)
+			initialContents: []ProduceItem{},
 			itemToAdd:       apple,
 			expected:        []ProduceItem{apple},
 		},
 		{ // Test add to full array
-			initialContents: fullSlice,
+			initialContents: []ProduceItem{apple, pear},
 			itemToAdd:       orange,
-			expected:        []ProduceItem{apple, orange, pear},
+			expected:        []ProduceItem{apple, orange, pear}, // Different order
 		},
 		{ // Test add to array with space
 			initialContents: partiallyFullSlice,
@@ -113,25 +87,200 @@ func TestPostProduce(t *testing.T) {
 			itemToAdd:       apple,
 			expected:        []ProduceItem{apple, pear},
 		},
+		{ // Test add item that should be inserted in the middle of the array
+			initialContents: partiallyFullSlice,
+			itemToAdd:       apple,
+			expected:        []ProduceItem{apple, pear},
+		},
+	}
+
+	for _, test := range testcases {
+		// Reset test data in case it has been changed
+		partiallyFullSlice = make([]ProduceItem, 0, 10)
+		partiallyFullSlice = append(partiallyFullSlice, apple)
+		partiallyFullSlice = append(partiallyFullSlice, pear)
+
+		// test
+		dao := NewProduceDao()
+		dao.produce = test.initialContents
+
+		dao.PostProduce(test.itemToAdd)
+
+		equal, msg := tEquivalent(dao.produce, test.expected)
+		if !equal {
+			t.Errorf("Expected and actual produce array %s", msg)
+			fmt.Printf("Expected: %v\n", test.expected)
+			fmt.Printf("Actual: %v\n", dao.produce)
+			t.Fail()
+		}
+
+	}
+}
+
+func TestDaoDeleteProduce(t *testing.T) {
+	// Create data structures for tests
+	partiallyFullSlice := make([]ProduceItem, 0, 10)
+	partiallyFullSlice = append(partiallyFullSlice, apple)
+	partiallyFullSlice = append(partiallyFullSlice, pear)
+
+	testcases := []struct {
+		initialContents []ProduceItem
+		codeToDelete    string
+		expected        []ProduceItem
+	}{
+		{ // Test delete last item
+			initialContents: []ProduceItem{apple, pear},
+			codeToDelete:    "1112-3334-5556-7778", //pear
+			expected:        []ProduceItem{apple},
+		},
+		{ // Test delete first item
+			initialContents: []ProduceItem{apple, pear},
+			codeToDelete:    "SN3J-3398-2222-1111", //apple
+			expected:        []ProduceItem{pear},
+		},
+		{ // Test delete invalid code
+			initialContents: []ProduceItem{apple, pear},
+			codeToDelete:    "0000-0000-2222-1111",      //invalid
+			expected:        []ProduceItem{pear, apple}, // Different order
+		},
+		{ // Test delete last remaining item
+			initialContents: []ProduceItem{apple},
+			codeToDelete:    "SN3J-3398-2222-1111", //apple
+			expected:        []ProduceItem{},
+		},
+		{ // Test delete from empty array
+			initialContents: []ProduceItem{},
+			codeToDelete:    "SN3J-3398-2222-1111", //apple
+			expected:        []ProduceItem{},
+		},
+	}
+	for _, test := range testcases {
+		// Reset test data in case it has been changed
+		partiallyFullSlice = make([]ProduceItem, 0, 10)
+		partiallyFullSlice = append(partiallyFullSlice, apple)
+		partiallyFullSlice = append(partiallyFullSlice, pear)
+
+		// test
+		dao := NewProduceDao()
+		dao.produce = test.initialContents
+
+		dao.DeleteProduce(test.codeToDelete)
+
+		equal, msg := tEquivalent(dao.produce, test.expected)
+		if !equal {
+			t.Errorf("Expected and actual produce array %s", msg)
+			fmt.Printf("Expected: %v\n", test.expected)
+			fmt.Printf("Actual: %v\n", dao.produce)
+			t.Fail()
+		}
+	}
+}
+
+//var apple ProduceItem = ProduceItem{
+//	Name:  "apple",
+//	Code:  "SN3J-3398-2222-1111",
+//	Price: 12.30,
+//}
+//var pear ProduceItem = ProduceItem{
+//	Name:  "pear",
+//	Code:  "1112-3334-5556-7778",
+//	Price: 3.3,
+//}
+//var orange ProduceItem = ProduceItem{
+//	Name:  "orange",
+//	Code:  "8888-AAAA-BBBB-OOOO",
+//	Price: 2.99,
+//}
+
+// Test for unintended state change behavior
+func TestDaoAllMutatingMethods(t *testing.T) {
+	testcases := []struct {
+		initialContents []ProduceItem
+		firstOp         string
+		firstArg        interface{}
+		secondOp        string
+		secondArg       interface{}
+		expected        []ProduceItem
+	}{
+		{ // Test add then add the same again
+			initialContents: []ProduceItem{apple},
+			firstOp:         "post",
+			firstArg:        pear,
+			secondOp:        "post",
+			secondArg:       pear,
+			expected:        []ProduceItem{apple, pear},
+		},
+		{ // Test delete then add different item
+			initialContents: []ProduceItem{apple, pear},
+			firstOp:         "delete",
+			firstArg:        "1112-3334-5556-7778", //pear
+			secondOp:        "post",
+			secondArg:       orange,
+			expected:        []ProduceItem{orange, apple}, // different order
+		},
+		{ // Test delete the same item twice
+			initialContents: []ProduceItem{apple, pear},
+			firstOp:         "delete",
+			firstArg:        "1112-3334-5556-7778", //pear
+			secondOp:        "delete",
+			secondArg:       "1112-3334-5556-7778", //pear
+			expected:        []ProduceItem{apple},
+		},
 	}
 
 	for _, test := range testcases {
 		dao := NewProduceDao()
 		dao.produce = test.initialContents
 
-		dao.PostProduce(test.itemToAdd)
-
-		equal, msg := equivalent(dao.produce, test.expected)
-		if !equal {
-			t.Errorf("Expected and actual %s", msg)
-			t.Fail()
+		switch test.firstOp {
+		case "post":
+			dao.PostProduce(test.firstArg.(ProduceItem))
+		case "delete":
+			dao.DeleteProduce(test.firstArg.(string))
 		}
 
-		// Reset test data in case it has been changed
-		emptySlice = []ProduceItem{}
-		fullSlice = []ProduceItem{apple, pear}
-		partiallyFullSlice = make([]ProduceItem, 0, 10)
-		partiallyFullSlice = append(partiallyFullSlice, apple)
-		partiallyFullSlice = append(partiallyFullSlice, pear)
+		switch test.secondOp {
+		case "post":
+			dao.PostProduce(test.secondArg.(ProduceItem))
+		case "delete":
+			dao.DeleteProduce(test.secondArg.(string))
+		}
+
+		equal, msg := tEquivalent(dao.produce, test.expected)
+		if !equal {
+			t.Errorf("Expected and actual produce array %s", msg)
+			fmt.Printf("Expected: %v\n", test.expected)
+			fmt.Printf("Actual: %v\n", dao.produce)
+			t.Fail()
+		}
 	}
+
+}
+
+func tContains(slice []ProduceItem, produce ProduceItem) bool {
+	for _, item := range slice {
+		if item.Name == produce.Name && item.Code == produce.Code && item.Price == produce.Price {
+			return true
+		}
+	}
+	return false
+}
+
+// Tests if the passed slices of ProduceItems are equivalent.
+// Returns true if they are and an error message if they aren't.
+func tEquivalent(first []ProduceItem, second []ProduceItem) (bool, string) {
+	if len(first) != len(second) {
+		return false, "lengths differ"
+	}
+	for _, item := range first {
+		if !tContains(second, item) {
+			return false, "contents differ"
+		}
+	}
+	for _, item := range second {
+		if !tContains(first, item) {
+			return false, "contents differ"
+		}
+	}
+	return true, ""
 }
