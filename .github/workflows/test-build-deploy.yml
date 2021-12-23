@@ -1,6 +1,4 @@
 name: test-build-deploy
-env:
-  GITHUB_REF_NAME: $GITHUB_REF_NAME
 on:
   push:
     branches:
@@ -37,7 +35,7 @@ jobs:
     needs:
       - test
       - build
-    if: ${{ env.GITHUB_REF_NAME == $default-branch }}
+    if: ${{ github.ref_name == $default-branch }}
     runs-on: self-hosted
     steps:
       - name: Deploy
