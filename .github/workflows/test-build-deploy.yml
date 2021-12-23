@@ -22,6 +22,8 @@ jobs:
           go test -v ./...
 
   build:
+    container:
+      image: golang:1.17
     needs: test
     runs-on: self-hosted
     steps:
