@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Build
         run: |
-          docker login -u ${{ secrets.DOCKER_USER }} -p ${{ secrets.DOCKER_TOKEN }} https://hub.docker.com
+          echo ${{ secrets.DOCKER_TOKEN }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
           docker build -t supermarket:$GITHUB_SHA .
           docker image tag supermarket:$GITHUB_SHA hub.docker.com/dsbevan/supermarket:$GITHUB_SHA
           docker image push hub.docker.com/dsbevan/supermarket:$GITHUB_SHA
