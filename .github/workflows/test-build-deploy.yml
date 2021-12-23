@@ -11,6 +11,8 @@ on:
 
 jobs:
   test:
+    container:
+      image: golang:1.17-alpine
     runs-on: self-hosted
     steps:
       - name: Checkout repo
@@ -20,6 +22,7 @@ jobs:
           go test -v ./...
 
   build:
+    needs: test
     runs-on: self-hosted
     steps:
       - name: Checkout repo
@@ -29,6 +32,9 @@ jobs:
           docker build -t supermarket:$GITHUB_SHA .
 
   deploy:
+    needs:
+      - test
+      - build
     if: ${{ $GITHUB_REF_NAME == $default-branch }}
     runs-on: self-hosted
     steps:
