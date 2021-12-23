@@ -35,6 +35,8 @@ jobs:
     needs:
       - test
       - build
+    env:
+      GITHUB_REF_NAME: $GITHUB_REF_NAME
     if: ${{ env.GITHUB_REF_NAME == $default-branch }}
     runs-on: self-hosted
     steps:
