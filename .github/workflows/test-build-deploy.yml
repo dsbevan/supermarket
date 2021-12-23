@@ -1,0 +1,36 @@
+name: test-build-deploy
+on:
+  push:
+    branches:
+      - $default-branch
+      - develop
+  pull_request:
+    branches:
+      - $default-branch
+      - develop
+
+jobs:
+  test:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: test
+        run: |
+          go test -v ./...
+
+  build:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Build
+        run: |
+          docker build -t supermarket:$GITHUB_SHA .
+
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Deploy
+        run: |
+          echo "deploy"
