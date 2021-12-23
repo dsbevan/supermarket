@@ -5,16 +5,17 @@ import . "supermarket/types"
 // Gets all stored produce, returning the list of produce
 // and nil if successful.
 type ProduceGetter interface {
-	GetProduce() ([]ProduceItem, error)
+	GetProduce() []ProduceItem
 }
 
-// Saves the given item, returning the item inserted if successful.
+// Saves the given items.
+// Returns a slice of successfully inserted items.
 type ProducePoster interface {
-	PostProduce(item *ProduceItem) (*ProduceItem, error)
+	PostProduce(items []ProduceItem) []ProduceItem
 }
 
 // Deletes the item with the given produce code.
 // Returns true if successful, else false.
 type ProduceDeleter interface {
-	DeleteProduce(code string) (bool, error)
+	DeleteProduce(code string) bool
 }

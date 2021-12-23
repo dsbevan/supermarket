@@ -4,10 +4,12 @@ import (
 	"strings"
 	"supermarket/data"
 	. "supermarket/types"
+	"sync"
 )
 
 type ProduceDao struct {
 	produce []ProduceItem
+	mu      sync.Mutex
 }
 
 func NewProduceDao() *ProduceDao {
@@ -20,7 +22,17 @@ func NewProduceDao() *ProduceDao {
 // Gets all the produce items.
 // Returns a slice of produce item pointers.
 func (d *ProduceDao) GetProduce() []ProduceItem {
-	return d.produce
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	// Return a copy so that concurrently processed requests cannot change
+	// the result of this get request.
+	size := len(d.produce)
+	res := make([]ProduceItem, size, size)
+	for i, val := range d.produce {
+		res[i] = val
+	}
+	return res
 }
 
 // Implements dao.ProducePoster
@@ -28,6 +40,9 @@ func (d *ProduceDao) GetProduce() []ProduceItem {
 // if the item does not already exist.
 // Returns true if successful, else false.
 func (d *ProduceDao) PostProduce(item ProduceItem) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
 	if contains(d.produce, &item) == -1 {
 		d.produce = append(d.produce, item)
 		return true
@@ -41,6 +56,9 @@ func (d *ProduceDao) PostProduce(item ProduceItem) bool {
 // Order is not preserved.
 // Returns true if successful, else false.
 func (d *ProduceDao) DeleteProduce(code string) bool {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
 	idx := containsCode(d.produce, code)
 	if idx == -1 { // Code not found
 		return false

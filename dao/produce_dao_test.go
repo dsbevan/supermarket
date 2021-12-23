@@ -2,6 +2,7 @@ package dao
 
 import (
 	"fmt"
+	"supermarket/testutils"
 	. "supermarket/types"
 	"testing"
 )
@@ -48,7 +49,7 @@ func TestDaoGetProduce(t *testing.T) {
 		dao := NewProduceDao()
 		dao.produce = test.storedProduce
 		produce := dao.GetProduce()
-		equal, msg := tEquivalent(produce, test.expected)
+		equal, msg := testutils.Equivalent(produce, test.expected)
 		if !equal {
 			t.Errorf("Expected and actual produce array %s", msg)
 			t.Fail()
@@ -106,7 +107,7 @@ func TestDaoPostProduce(t *testing.T) {
 
 		dao.PostProduce(test.itemToAdd)
 
-		equal, msg := tEquivalent(dao.produce, test.expected)
+		equal, msg := testutils.Equivalent(dao.produce, test.expected)
 		if !equal {
 			t.Errorf("Expected and actual produce array %s", msg)
 			fmt.Printf("Expected: %v\n", test.expected)
@@ -166,7 +167,7 @@ func TestDaoDeleteProduce(t *testing.T) {
 
 		dao.DeleteProduce(test.codeToDelete)
 
-		equal, msg := tEquivalent(dao.produce, test.expected)
+		equal, msg := testutils.Equivalent(dao.produce, test.expected)
 		if !equal {
 			t.Errorf("Expected and actual produce array %s", msg)
 			fmt.Printf("Expected: %v\n", test.expected)
@@ -246,7 +247,7 @@ func TestDaoAllMutatingMethods(t *testing.T) {
 			dao.DeleteProduce(test.secondArg.(string))
 		}
 
-		equal, msg := tEquivalent(dao.produce, test.expected)
+		equal, msg := testutils.Equivalent(dao.produce, test.expected)
 		if !equal {
 			t.Errorf("Expected and actual produce array %s", msg)
 			fmt.Printf("Expected: %v\n", test.expected)
@@ -255,32 +256,4 @@ func TestDaoAllMutatingMethods(t *testing.T) {
 		}
 	}
 
-}
-
-func tContains(slice []ProduceItem, produce ProduceItem) bool {
-	for _, item := range slice {
-		if item.Name == produce.Name && item.Code == produce.Code && item.Price == produce.Price {
-			return true
-		}
-	}
-	return false
-}
-
-// Tests if the passed slices of ProduceItems are equivalent.
-// Returns true if they are and an error message if they aren't.
-func tEquivalent(first []ProduceItem, second []ProduceItem) (bool, string) {
-	if len(first) != len(second) {
-		return false, "lengths differ"
-	}
-	for _, item := range first {
-		if !tContains(second, item) {
-			return false, "contents differ"
-		}
-	}
-	for _, item := range second {
-		if !tContains(first, item) {
-			return false, "contents differ"
-		}
-	}
-	return true, ""
 }
