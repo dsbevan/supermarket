@@ -11,9 +11,9 @@ on:
 
 jobs:
   test:
+    runs-on: self-hosted
     container:
       image: golang:1.17
-    runs-on: self-hosted
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
@@ -22,13 +22,13 @@ jobs:
           go test -v ./...
 
   build:
+    needs: test
+    runs-on: self-hosted
     container:
       image: golang:1.17
       volumes:
         - /usr/bin/docker:/usr/bin/docker
         - /var/run/docker.sock:/var/run/docker.sock
-    needs: test
-    runs-on: self-hosted
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
