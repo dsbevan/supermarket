@@ -16,6 +16,4 @@ jobs:
       - name: Build
         run: |
           ls
-          ls ..
-        run: |
           docker build -t supermarket .
