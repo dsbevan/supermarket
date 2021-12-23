@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     container:
-      image: golang:1.17-alpine
+      image: golang:1.17
     runs-on: self-hosted
     steps:
       - name: Checkout repo
