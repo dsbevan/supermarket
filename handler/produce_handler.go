@@ -29,10 +29,9 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		fmt.Fprintln(w, "in GET")
 
-		if res, err := h.produceGetter.GetProduce(); err != nil {
-			// Handle or send error message
-		} else if jsn, err := json.Marshal(res); err != nil {
-			// Handle or send error message
+		res := h.produceGetter.GetProduce()
+		if jsn, err := json.Marshal(res); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
 			w.Write(jsn)
@@ -41,12 +40,15 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	case "POST":
 		fmt.Fprintln(w, "in POST")
 
-		if res, err := h.producePoster.PostProduce(); err != nil {
-			// Handle CreateProduce error
-		} else if res == nil {
-			// Item already exists
-		} else if jsn, err := json.Marshal(res); err != nil {
-			// Handle json error
+		body := PostProduceRequestBody{}
+		getBody(w, r, body)
+
+		//TODO check format of produce items in body
+
+		// Fulfill request
+		res := h.producePoster.PostProduce(body.Produce)
+		if jsn, err := json.Marshal(res); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
 			w.Write(jsn)
@@ -55,12 +57,16 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	case "DELETE":
 		fmt.Fprintln(w, "in DELETE")
 
-		if deleted, err := h.produceDeleter.DeleteProduce(); err != nil {
-			// Handle DeleteProduce error
-		} else if deleted == false {
-			// Item did not exist
-		} else if jsn, err := json.Marshal(deleted); err != nil {
-			// Handle json error
+		body := DeleteProduceRequestBody{}
+		getBody(w, r, body)
+
+		//TODO check format of produce code in body
+
+		// Fulfill request
+		response := DeleteProduceResponse{}
+		response.Success = h.produceDeleter.DeleteProduce(body.Code)
+		if jsn, err := json.Marshal(response); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
 		} else {
 			w.WriteHeader(http.StatusOK)
 			w.Write(jsn)
@@ -69,5 +75,24 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	default:
 		w.Write([]byte("in produce"))
 
+	}
+}
+
+func getBody(w http.ResponseWriter, r *http.Request, bodyObject interface{}) {
+	// Get body
+	if r.Body == nil {
+		// No body when there should be
+		w.WriteHeader(http.StatusBadRequest)
+	}
+	b := make([]byte, 0, 512)
+	if _, err := r.Body.Read(b); err != nil {
+		// Error reading body
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+
+	// Parse body
+	if err := json.Unmarshal(b, &bodyObject); err != nil {
+		// Incorrectly formatted body
+		w.WriteHeader(http.StatusBadRequest)
 	}
 }
