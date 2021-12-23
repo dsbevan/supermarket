@@ -15,4 +15,4 @@ jobs:
     steps:
       - name: Build
         run: |
-          echo "this is my first github action"
+          docker build -t supermarket .
