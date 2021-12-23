@@ -29,6 +29,7 @@ jobs:
           docker build -t supermarket:$GITHUB_SHA .
 
   deploy:
+    if: ${{ $GITHUB_REF_NAME == $default-branch }}
     runs-on: self-hosted
     steps:
       - name: Deploy
