@@ -35,7 +35,7 @@ jobs:
     needs:
       - test
       - build
-    if: ${{ github.ref_name == $default-branch }}
+    if: ${{ github.ref_name == 'main' }}
     runs-on: self-hosted
     steps:
       - name: Deploy
