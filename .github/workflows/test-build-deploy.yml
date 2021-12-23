@@ -22,8 +22,11 @@ jobs:
           go test -v ./...
 
   build:
-    container:
-      image: golang:1.17
+    services:
+      buildService:
+        image: golang:1.17
+        volumes:
+          - /var/run/docker.sock:/var/run/docker.sock
     needs: test
     runs-on: self-hosted
     steps:
