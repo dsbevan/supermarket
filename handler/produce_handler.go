@@ -26,8 +26,6 @@ func NewProduceHandler() *ProduceHandler {
 func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case "GET":
-		fmt.Fprintln(w, "in GET")
-
 		produce := h.produceGetter.GetProduce()
 		res := GetProduceResponse{produce}
 		if jsn, err := json.Marshal(res); err != nil {
@@ -37,15 +35,14 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "POST":
-		fmt.Fprintln(w, "in POST")
-
 		body := PostProduceRequest{}
-		getBody(w, r, body)
+		getBody(w, r, &body)
 
 		//TODO check format of produce items in body
 
 		// Fulfill request
-		res := h.producePoster.PostProduce(body.Produce)
+		produce := h.producePoster.PostProduce(body.Produce)
+		res := PostProduceResponse{produce}
 		if jsn, err := json.Marshal(res); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
@@ -53,10 +50,10 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "DELETE":
-		fmt.Fprintln(w, "in DELETE")
+		fmt.Println("in DELETE")
 
 		body := DeleteProduceRequest{}
-		getBody(w, r, body)
+		getBody(w, r, &body)
 
 		//TODO check format of produce code in body
 
@@ -75,20 +72,22 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getBody(w http.ResponseWriter, r *http.Request, bodyObject interface{}) {
+func getBody(w http.ResponseWriter, r *http.Request, bodyObjectPointer interface{}) {
 	// Get body
 	if r.Body == nil {
 		// No body when there should be
 		w.WriteHeader(http.StatusBadRequest)
 	}
-	b := make([]byte, 0, 512)
-	if _, err := r.Body.Read(b); err != nil {
+	b := make([]byte, 2048, 2048)
+	if bytesRead, err := r.Body.Read(b); err != nil {
 		// Error reading body
 		w.WriteHeader(http.StatusInternalServerError)
+	} else {
+		b = b[0:bytesRead]
 	}
 
 	// Parse body
-	if err := json.Unmarshal(b, &bodyObject); err != nil {
+	if err := json.Unmarshal(b, bodyObjectPointer); err != nil {
 		// Incorrectly formatted body
 		w.WriteHeader(http.StatusBadRequest)
 	}

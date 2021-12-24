@@ -10,6 +10,10 @@ type PostProduceRequest struct {
 	Produce []ProduceItem `json:"produce"`
 }
 
+type PostProduceResponse struct {
+	Produce []ProduceItem `json:"produce"`
+}
+
 type DeleteProduceRequest struct {
 	Code string `json:"code"`
 }
