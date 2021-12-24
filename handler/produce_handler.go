@@ -12,6 +12,8 @@ type ProduceHandler struct {
 	produceDeleter service.ProduceDeleter
 }
 
+// Returns a new ProduceHandler that uses service.ProduceService
+// as the default service implementation.
 func NewProduceHandler() *ProduceHandler {
 	svc := service.NewProduceService()
 	return &ProduceHandler{

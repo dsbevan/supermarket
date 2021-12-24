@@ -12,6 +12,8 @@ type ProduceService struct {
 	produceDeleter dao.ProduceDeleter
 }
 
+// Returns a new ProduceService that uses dao.ProduceDao
+// as the default DAO implementation
 func NewProduceService() *ProduceService {
 	dao := dao.NewProduceDao()
 	return &ProduceService{

@@ -12,6 +12,8 @@ type ProduceDao struct {
 	mu      sync.Mutex
 }
 
+// Creates a new ProduceDao using data.Produce as the default
+// data storage implementation.
 func NewProduceDao() *ProduceDao {
 	return &ProduceDao{
 		produce: &data.ProduceSlice,

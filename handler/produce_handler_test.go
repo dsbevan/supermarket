@@ -67,6 +67,7 @@ var noDecimal ProduceItem = ProduceItem{
 	Price: 2, // Valid
 }
 
+// Helper function for mocking request bodies
 func jsonBodyBytes(i interface{}) []byte {
 	bytes, _ := json.Marshal(i)
 	return bytes
@@ -82,6 +83,7 @@ func makeHttpRequest(method string, body []byte) *http.Request {
 }
 
 // Mock http.Request.Body
+// Implements io.ReadCloser
 type Body struct {
 	body []byte
 }
@@ -99,6 +101,7 @@ func (b Body) Close() error {
 }
 
 // Mock response writer
+// Implements http.ResponseWriter interface
 type MockWriter struct {
 	http.ResponseWriter
 	buffer     *[]byte
