@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"supermarket/service"
+	"supermarket/types"
 )
 
 type ProduceHandler struct {
@@ -44,7 +45,7 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 
 		// Validate request values
 		for _, item := range body.Produce {
-			if !validCode(item.Code) || !validName(item.Name) || !validPrice(item.Price) {
+			if !types.ValidItem(item) {
 				badRequest(w, "Invalid code, name, or price format")
 				return
 			}
@@ -67,7 +68,7 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Validate code format
-		if !validCode(body.Code) {
+		if !types.ValidCode(body.Code) {
 			badRequest(w, "Invalid produce code format")
 			return
 		}

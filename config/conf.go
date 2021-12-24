@@ -1,7 +1,9 @@
 package config
 
+import . "supermarket/types"
+
 type ConfigData struct {
-	ArraySize int
+	InitialProduce []ProduceItem
 }
 
 // This variable is set in main() using the configuration

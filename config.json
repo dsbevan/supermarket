@@ -1,9 +1,24 @@
 {
-    "arraysize":20,
     "initialProduce":[
-        {},
-        {},
-        {},
-        {}
+        {
+            "name": "Lettuce",
+            "code": "A12T-4GH7-QPL9-3N4M",
+            "price": 3.46
+        },
+        {
+            "name": "Peach",
+            "code": "E5T6-9UI3-TH15-QR88",
+            "price": 2.99
+        },
+        {
+            "name": "Green Pepper",
+            "code": "YRT6-72AS-K736-L4AR",
+            "price": 0.79
+        },
+        {
+            "name": "Gala Apple",
+            "code": "TQ4C-VV6T-75ZX-1RMR",
+            "price": 3.59
+        }
     ]
 }
