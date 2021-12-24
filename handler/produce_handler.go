@@ -62,20 +62,23 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "DELETE":
-		body := DeleteProduceRequest{}
-		if ok := getBody(w, r, &body); !ok {
+		// Check for produce code parameter
+		values := r.URL.Query()["Produce Code"]
+		if len(values) < 1 {
+			badRequest(w, "Missing 'Produce Code' url parameter")
 			return
 		}
+		code := values[0]
 
 		// Validate code format
-		if !types.ValidCode(body.Code) {
+		if !types.ValidCode(code) {
 			badRequest(w, "Invalid produce code format")
 			return
 		}
 
 		// Fulfill request
 		response := DeleteProduceResponse{}
-		response.Success = h.produceDeleter.DeleteProduce(body.Code)
+		response.Success = h.produceDeleter.DeleteProduce(code)
 		if jsn, err := json.Marshal(response); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return

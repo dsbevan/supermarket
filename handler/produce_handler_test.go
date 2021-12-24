@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"net/url"
 	"testing"
 
 	"supermarket/service"
@@ -75,6 +76,15 @@ func jsonBodyBytes(i interface{}) []byte {
 
 // Mock http request
 func makeHttpRequest(method string, body []byte) *http.Request {
+	if method == "DELETE" {
+		return &http.Request{
+			Method: method,
+			URL: &url.URL{
+				RawQuery: string(body),
+			},
+		}
+	}
+
 	b := Body{body}
 	return &http.Request{
 		Method: method,
@@ -367,7 +377,7 @@ func TestHandleDelete(t *testing.T) {
 		{
 			name:           "Simple delete test",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc-dddd"}`)),
+			request:        makeHttpRequest("DELETE", []byte("Produce+Code=aaaa-bbbb-cccc-dddd")),
 			produceDeleter: MockProduceDeleter{true},
 			expected:       true,
 			expectedCode:   200,
@@ -375,7 +385,7 @@ func TestHandleDelete(t *testing.T) {
 		{
 			name:           "Simple delete failure test/code not found",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc-dddd"}`)),
+			request:        makeHttpRequest("DELETE", []byte("Produce+Code=aaaa-bbbb-cccc-dddd")),
 			produceDeleter: MockProduceDeleter{false},
 			expected:       false,
 			expectedCode:   200,
@@ -385,21 +395,21 @@ func TestHandleDelete(t *testing.T) {
 		{
 			name:           "Test delete with an invalid code",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc.dddd"}`)),
+			request:        makeHttpRequest("DELETE", []byte("Produce+Code=aaaa-bbbb-cccc.dddd")),
 			produceDeleter: MockProduceDeleter{false}, // Unused
 			expected:       false,                     // Unused
 			expectedCode:   400,
 		},
 		{
-			name:           "Test delete with invalid json request body",
+			name:           "Test delete with an invalid query parameter name",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc.dddd"`)),
-			produceDeleter: MockProduceDeleter{false}, // Unused
-			expected:       false,                     // Unused
+			request:        makeHttpRequest("DELETE", []byte("Produce=aaaa-bbbb-cccc.dddd")), // Invalid
+			produceDeleter: MockProduceDeleter{false},                                        // Unused
+			expected:       false,                                                            // Unused
 			expectedCode:   400,
 		},
 		{
-			name:           "Test delete with no body",
+			name:           "Test delete with no url parameter",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("DELETE", nil),
 			produceDeleter: MockProduceDeleter{false}, // Unused
@@ -418,6 +428,7 @@ func TestHandleDelete(t *testing.T) {
 		if *test.responseWriter.statusCode != test.expectedCode {
 			t.Errorf("%s", test.name)
 			t.Errorf("Expected %d status code. Actual %d", test.expectedCode, *test.responseWriter.statusCode)
+			t.Errorf("%s", string(*test.responseWriter.buffer))
 			t.Fail()
 		}
 
