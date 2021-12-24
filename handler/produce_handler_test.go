@@ -51,6 +51,11 @@ var nonAlphaCode ProduceItem = ProduceItem{
 	Code:  "8888-AAAA-B/BB-OOOO", //Invalid
 	Price: 2.99,
 }
+var extraSet ProduceItem = ProduceItem{
+	Name:  "orange",
+	Code:  "8888-AAAA-BBBB-OOOO-3333", //Invalid
+	Price: 2.99,
+}
 var extraDigit ProduceItem = ProduceItem{
 	Name:  "orange",
 	Code:  "8888-AAAA-BBBB-OOOO",
@@ -123,7 +128,7 @@ func (m MockProduceGetter) GetProduce() []ProduceItem {
 	return m.produce
 }
 
-func TestGet(t *testing.T) {
+func TestHandleGet(t *testing.T) {
 	testcases := []struct {
 		name           string
 		responseWriter MockWriter
@@ -168,6 +173,7 @@ func TestGet(t *testing.T) {
 		if *test.responseWriter.statusCode != test.expectedCode {
 			t.Errorf("%s", test.name)
 			t.Errorf("Expected %d status code. Actual %d", test.expectedCode, *&test.responseWriter.statusCode)
+			t.Fail()
 		}
 
 		res := GetProduceResponse{}
@@ -194,7 +200,7 @@ func (m MockProducePoster) PostProduce(i []ProduceItem) []ProduceItem {
 	return m.produce
 }
 
-func TestPost(t *testing.T) {
+func TestHandlePost(t *testing.T) {
 	testcases := []struct {
 		name           string
 		responseWriter MockWriter
@@ -228,6 +234,22 @@ func TestPost(t *testing.T) {
 			expectedCode:   200,
 		},
 		{
+			name:           "Test valid produce name with numbers",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, numName}})), //Name with nums
+			producePoster:  MockProducePoster{[]ProduceItem{apple, numName}},
+			expected:       []ProduceItem{apple, numName},
+			expectedCode:   200,
+		},
+		{
+			name:           "Test invalid name",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, invalidName}})), //Invalid name
+			producePoster:  MockProducePoster{[]ProduceItem{apple}},                                                       // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
+		},
+		{
 			name:           "Test malformed request body",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("POST", jsonBodyBytes("{hello, this is a bad body}")),
@@ -252,25 +274,17 @@ func TestPost(t *testing.T) {
 			expectedCode:   400, // Bad request
 		},
 		{
-			name:           "Test valid produce name with numbers",
+			name:           "Test non-alphanumeric code",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, numName}})), //Name with nums
-			producePoster:  MockProducePoster{[]ProduceItem{apple, numName}},
-			expected:       []ProduceItem{apple, numName},
-			expectedCode:   200,
-		},
-		{
-			name:           "Test invalid name",
-			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, invalidName}})), //Invalid name
-			producePoster:  MockProducePoster{[]ProduceItem{apple}},                                                       // Unused
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{nonAlphaCode}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
 			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
 		},
 		{
-			name:           "Test non-alphanumeric code",
+			name:           "Test extra code set",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{nonAlphaCode}})),
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{extraSet}})),
 			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
 			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
@@ -290,6 +304,14 @@ func TestPost(t *testing.T) {
 			producePoster:  MockProducePoster{[]ProduceItem{noDecimal}},
 			expected:       []ProduceItem{noDecimal},
 			expectedCode:   200,
+		},
+		{
+			name:           "Test post with no body",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", nil),             // No body
+			producePoster:  MockProducePoster{[]ProduceItem{orange}}, // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
 		},
 	}
 
@@ -315,7 +337,97 @@ func TestPost(t *testing.T) {
 			t.Errorf("%s", test.name)
 			t.Errorf("Expected and actual %s.\n Expected: %v\n Actual: %v",
 				msg, test.expected, res.Produce)
+			t.Errorf("%s", string(*test.responseWriter.buffer))
 			t.Fail()
 		}
+	}
+}
+
+// Mock service.ProduceDeleter
+type MockProduceDeleter struct {
+	returnVal bool
+}
+
+func (m MockProduceDeleter) DeleteProduce(code string) bool {
+	return m.returnVal
+}
+
+func TestHandleDelete(t *testing.T) {
+	testcases := []struct {
+		name           string
+		responseWriter MockWriter
+		request        *http.Request
+		produceDeleter service.ProduceDeleter
+		expected       bool
+		expectedCode   int
+	}{
+		{
+			name:           "Simple delete test",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc-dddd"}`)),
+			produceDeleter: MockProduceDeleter{true},
+			expected:       true,
+			expectedCode:   200,
+		},
+		{
+			name:           "Simple delete failure test/code not found",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc-dddd"}`)),
+			produceDeleter: MockProduceDeleter{false},
+			expected:       false,
+			expectedCode:   200,
+		},
+		// The following test uses the same validation mechanism as POST,
+		//  so other error cases are covered.
+		{
+			name:           "Test delete with an invalid code",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc.dddd"}`)),
+			produceDeleter: MockProduceDeleter{false}, // Unused
+			expected:       false,                     // Unused
+			expectedCode:   400,
+		},
+		{
+			name:           "Test delete with invalid json request body",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("DELETE", []byte(`{"code":"aaaa-bbbb-cccc.dddd"`)),
+			produceDeleter: MockProduceDeleter{false}, // Unused
+			expected:       false,                     // Unused
+			expectedCode:   400,
+		},
+		{
+			name:           "Test delete with no body",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("DELETE", nil),
+			produceDeleter: MockProduceDeleter{false}, // Unused
+			expected:       false,                     // Unused
+			expectedCode:   400,
+		},
+	}
+
+	for _, test := range testcases {
+		handler := NewProduceHandler()
+		handler.produceDeleter = test.produceDeleter
+
+		handler.HandleProduce(test.responseWriter, test.request)
+
+		// Check status code
+		if *test.responseWriter.statusCode != test.expectedCode {
+			t.Errorf("%s", test.name)
+			t.Errorf("Expected %d status code. Actual %d", test.expectedCode, *test.responseWriter.statusCode)
+			t.Fail()
+		}
+
+		res := DeleteProduceResponse{}
+		json.Unmarshal(*test.responseWriter.buffer, &res)
+
+		// Compare expected and actual result
+		if res.Success != test.expected {
+			t.Errorf("%s", test.name)
+			t.Errorf("Expected and actual results differ. Expected: %v, Actual: %v", test.expected, res.Success)
+			t.Errorf("%s", string(*test.responseWriter.buffer))
+			t.Fail()
+		}
+
 	}
 }

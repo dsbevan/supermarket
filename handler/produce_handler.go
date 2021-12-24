@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"supermarket/service"
 )
@@ -60,8 +59,6 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "DELETE":
-		fmt.Println("in DELETE")
-
 		body := DeleteProduceRequest{}
 		if ok := getBody(w, r, &body); !ok {
 			return
@@ -109,7 +106,7 @@ func getBody(w http.ResponseWriter, r *http.Request, bodyObjectPointer interface
 	// Parse body
 	if err := json.Unmarshal(b, bodyObjectPointer); err != nil {
 		// Incorrectly formatted body
-		badRequest(w, "Incorrect body format")
+		badRequest(w, "Invalid body format")
 		return false
 	}
 	return true
