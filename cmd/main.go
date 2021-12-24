@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
+	"supermarket/config"
 	"supermarket/handler"
 	"supermarket/middleware"
 	"supermarket/util"
@@ -16,5 +18,7 @@ func main() {
 	util.LoadConfigFatal(CONFIG_FILENAME)
 
 	http.HandleFunc("/supermarket/produce", middleware.Authenticate(handler.NewProduceHandler().HandleProduce))
-	http.ListenAndServe(":8080", nil)
+
+	fmt.Printf("Server listening on port %d...\n", config.Config.ListenPort)
+	http.ListenAndServe(":"+fmt.Sprint(config.Config.ListenPort), nil)
 }

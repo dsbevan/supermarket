@@ -1,4 +1,5 @@
 {
+    "listenPort": 8080,
     "initialProduce":[
         {
             "name": "Lettuce",

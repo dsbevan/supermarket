@@ -4,6 +4,7 @@ import . "supermarket/types"
 
 type ConfigData struct {
 	InitialProduce []ProduceItem
+	ListenPort     int
 }
 
 // This variable is set in main() using the configuration
