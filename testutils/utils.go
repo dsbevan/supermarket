@@ -1,6 +1,8 @@
 package testutils
 
-import . "supermarket/types"
+import (
+	. "supermarket/types"
+)
 
 func Contains(slice []ProduceItem, produce ProduceItem) bool {
 	for _, item := range slice {

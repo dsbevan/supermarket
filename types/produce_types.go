@@ -3,7 +3,7 @@ package types
 type ProduceItem struct {
 	Name  string  `json:"name"`
 	Code  string  `json:"code"`
-	Price float32 `json:"price"`
+	Price float64 `json:"price"`
 }
 
 func (p *ProduceItem) GetName() string {
@@ -14,7 +14,7 @@ func (p *ProduceItem) GetCode() string {
 	return p.Code
 }
 
-func (p *ProduceItem) GetPrice() float32 {
+func (p *ProduceItem) GetPrice() float64 {
 	return p.Price
 }
 

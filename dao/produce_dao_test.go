@@ -47,7 +47,7 @@ func TestDaoGetProduce(t *testing.T) {
 
 	for _, test := range testcases {
 		dao := NewProduceDao()
-		dao.produce = test.storedProduce
+		dao.produce = &test.storedProduce
 		produce := dao.GetProduce()
 		equal, msg := testutils.Equivalent(produce, test.expected)
 		if !equal {
@@ -103,11 +103,11 @@ func TestDaoPostProduce(t *testing.T) {
 
 		// test
 		dao := NewProduceDao()
-		dao.produce = test.initialContents
+		dao.produce = &test.initialContents
 
 		dao.PostProduce(test.itemToAdd)
 
-		equal, msg := testutils.Equivalent(dao.produce, test.expected)
+		equal, msg := testutils.Equivalent(*dao.produce, test.expected)
 		if !equal {
 			t.Errorf("Expected and actual produce array %s", msg)
 			fmt.Printf("Expected: %v\n", test.expected)
@@ -163,11 +163,11 @@ func TestDaoDeleteProduce(t *testing.T) {
 
 		// test
 		dao := NewProduceDao()
-		dao.produce = test.initialContents
+		dao.produce = &test.initialContents
 
 		dao.DeleteProduce(test.codeToDelete)
 
-		equal, msg := testutils.Equivalent(dao.produce, test.expected)
+		equal, msg := testutils.Equivalent(*dao.produce, test.expected)
 		if !equal {
 			t.Errorf("Expected and actual produce array %s", msg)
 			fmt.Printf("Expected: %v\n", test.expected)
@@ -231,7 +231,7 @@ func TestDaoAllMutatingMethods(t *testing.T) {
 
 	for _, test := range testcases {
 		dao := NewProduceDao()
-		dao.produce = test.initialContents
+		dao.produce = &test.initialContents
 
 		switch test.firstOp {
 		case "post":
@@ -247,7 +247,7 @@ func TestDaoAllMutatingMethods(t *testing.T) {
 			dao.DeleteProduce(test.secondArg.(string))
 		}
 
-		equal, msg := testutils.Equivalent(dao.produce, test.expected)
+		equal, msg := testutils.Equivalent(*dao.produce, test.expected)
 		if !equal {
 			t.Errorf("Expected and actual produce array %s", msg)
 			fmt.Printf("Expected: %v\n", test.expected)

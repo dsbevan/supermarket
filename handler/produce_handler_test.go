@@ -41,8 +41,8 @@ var numName ProduceItem = ProduceItem{
 	Code:  "8888-AAAA-BBBB-OOOO",
 	Price: 2.99,
 }
-var nonAlphaName ProduceItem = ProduceItem{
-	Name:  "0range", //Invalid
+var invalidName ProduceItem = ProduceItem{
+	Name:  "0RAN+E",
 	Code:  "8888-AAAA-BBBB-OOOO",
 	Price: 2.99,
 }
@@ -55,6 +55,11 @@ var extraDigit ProduceItem = ProduceItem{
 	Name:  "orange",
 	Code:  "8888-AAAA-BBBB-OOOO",
 	Price: 2.998, //Invalid
+}
+var noDecimal ProduceItem = ProduceItem{
+	Name:  "orange",
+	Code:  "8888-AAAA-BBBB-OOOO",
+	Price: 2, // Valid
 }
 
 func jsonBodyBytes(i interface{}) []byte {
@@ -120,27 +125,31 @@ func (m MockProduceGetter) GetProduce() []ProduceItem {
 
 func TestGet(t *testing.T) {
 	testcases := []struct {
+		name           string
 		responseWriter MockWriter
 		request        *http.Request
 		produceGetter  service.ProduceGetter
 		expected       []ProduceItem
 		expectedCode   int
 	}{
-		{ // Single item GET
+		{
+			name:           "Single item GET",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("GET", []byte("")),
 			produceGetter:  MockProduceGetter{[]ProduceItem{apple}},
 			expected:       []ProduceItem{apple},
 			expectedCode:   200,
 		},
-		{ // Multi-item GET
+		{
+			name:           "Multi-item GET",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("GET", []byte("")),
 			produceGetter:  MockProduceGetter{[]ProduceItem{apple, pear, orange}},
 			expected:       []ProduceItem{apple, orange, pear}, // Different order
 			expectedCode:   200,
 		},
-		{ // Empty GET
+		{
+			name:           "Empty GET",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("GET", []byte("")),
 			produceGetter:  MockProduceGetter{[]ProduceItem{}},
@@ -157,6 +166,7 @@ func TestGet(t *testing.T) {
 
 		// Check status code
 		if *test.responseWriter.statusCode != test.expectedCode {
+			t.Errorf("%s", test.name)
 			t.Errorf("Expected %d status code. Actual %d", test.expectedCode, *&test.responseWriter.statusCode)
 		}
 
@@ -166,6 +176,7 @@ func TestGet(t *testing.T) {
 		// Compare result and expected result
 		same, msg := testutils.Equivalent(res.Produce, test.expected)
 		if !same {
+			t.Errorf("%s", test.name)
 			t.Errorf("Actual and expected %s.\n Expected: %v\n Actual: %v",
 				msg, res.Produce, test.expected)
 			t.Fail()
@@ -185,46 +196,100 @@ func (m MockProducePoster) PostProduce(i []ProduceItem) []ProduceItem {
 
 func TestPost(t *testing.T) {
 	testcases := []struct {
+		name           string
 		responseWriter MockWriter
 		request        *http.Request
 		producePoster  service.ProducePoster
 		expected       []ProduceItem
 		expectedCode   int
 	}{
-		{ // Test single post success
+		{
+			name:           "Test single post success",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple}})),
 			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Success
 			expected:       []ProduceItem{apple},
 			expectedCode:   200,
 		},
-		{ // Test single post failed to post
+		{
+			name:           "Test single post failed to post",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple}})),
 			producePoster:  MockProducePoster{[]ProduceItem{}}, // Empty because it failed to post (already exists or full)
 			expected:       []ProduceItem{},
 			expectedCode:   200,
 		},
-		{ // Test multiple post with some failures
+		{
+			name:           "Test multiple post with some failures",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, pear, orange}})),
 			producePoster:  MockProducePoster{[]ProduceItem{apple, pear}}, // Orange failed
 			expected:       []ProduceItem{apple, pear},
 			expectedCode:   200,
 		},
-		{ // Test malformed request body
+		{
+			name:           "Test malformed request body",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("POST", jsonBodyBytes("{hello, this is a bad body}")),
-			producePoster:  MockProducePoster{[]ProduceItem{apple, pear}},
-			expected:       []ProduceItem{apple, pear},
+			producePoster:  MockProducePoster{[]ProduceItem{apple, pear}}, // Unused
+			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
 		},
-		{ // Test invalid produce code
+		{
+			name:           "Test invalid produce code missing char",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, missingChar}})), //missingChar
-			producePoster:  MockProducePoster{[]ProduceItem{apple, pear}},
-			expected:       []ProduceItem{apple, pear},
+			producePoster:  MockProducePoster{[]ProduceItem{apple, pear}},                                                 // Unused
+			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
+		},
+		{
+			name:           "Test invalid produce code missing dash",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, missingDash}})), //missingChar
+			producePoster:  MockProducePoster{[]ProduceItem{apple}},                                                       // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
+		},
+		{
+			name:           "Test valid produce name with numbers",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, numName}})), //Name with nums
+			producePoster:  MockProducePoster{[]ProduceItem{apple, numName}},
+			expected:       []ProduceItem{apple, numName},
+			expectedCode:   200,
+		},
+		{
+			name:           "Test invalid name",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, invalidName}})), //Invalid name
+			producePoster:  MockProducePoster{[]ProduceItem{apple}},                                                       // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
+		},
+		{
+			name:           "Test non-alphanumeric code",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{nonAlphaCode}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
+		},
+		{
+			name:           "Test extra decimal places in price",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{extraDigit}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
+		},
+		{
+			name:           "Test no decimal places in price",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{noDecimal}})),
+			producePoster:  MockProducePoster{[]ProduceItem{noDecimal}},
+			expected:       []ProduceItem{noDecimal},
+			expectedCode:   200,
 		},
 	}
 
@@ -236,6 +301,7 @@ func TestPost(t *testing.T) {
 
 		// Check status code
 		if *test.responseWriter.statusCode != test.expectedCode {
+			t.Errorf("%s", test.name)
 			t.Errorf("Expected %d status code. Actual %d", test.expectedCode, *test.responseWriter.statusCode)
 			t.Fail()
 		}
@@ -246,8 +312,9 @@ func TestPost(t *testing.T) {
 		// Compare result and expected result
 		same, msg := testutils.Equivalent(res.Produce, test.expected)
 		if !same {
-			t.Errorf("Actual and expected %s.\n Expected: %v\n Actual: %v",
-				msg, res.Produce, test.expected)
+			t.Errorf("%s", test.name)
+			t.Errorf("Expected and actual %s.\n Expected: %v\n Actual: %v",
+				msg, test.expected, res.Produce)
 			t.Fail()
 		}
 	}
