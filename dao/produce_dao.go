@@ -8,13 +8,13 @@ import (
 )
 
 type ProduceDao struct {
-	produce []ProduceItem
+	produce *[]ProduceItem
 	mu      sync.Mutex
 }
 
 func NewProduceDao() *ProduceDao {
 	return &ProduceDao{
-		produce: data.Produce[:],
+		produce: &data.ProduceSlice,
 	}
 }
 
@@ -27,9 +27,9 @@ func (d *ProduceDao) GetProduce() []ProduceItem {
 
 	// Return a copy so that concurrently processed requests cannot change
 	// the result of this get request.
-	size := len(d.produce)
+	size := len(*d.produce)
 	res := make([]ProduceItem, size, size)
-	for i, val := range d.produce {
+	for i, val := range *d.produce {
 		res[i] = val
 	}
 	return res
@@ -43,8 +43,8 @@ func (d *ProduceDao) PostProduce(item ProduceItem) bool {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	if contains(d.produce, &item) == -1 {
-		d.produce = append(d.produce, item)
+	if contains(*d.produce, &item) == -1 {
+		*d.produce = append(*d.produce, item)
 		return true
 	}
 	return false
@@ -59,12 +59,12 @@ func (d *ProduceDao) DeleteProduce(code string) bool {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	idx := containsCode(d.produce, code)
+	idx := containsCode(*d.produce, code)
 	if idx == -1 { // Code not found
 		return false
 	}
 	var ok bool
-	if d.produce, ok = deleteProduce(d.produce, idx); !ok {
+	if *d.produce, ok = deleteProduce(*d.produce, idx); !ok {
 		return false
 	}
 	return true

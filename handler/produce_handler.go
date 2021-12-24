@@ -24,23 +24,22 @@ func NewProduceHandler() *ProduceHandler {
 
 // Handle /produce requests
 func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("in produce")
 	switch r.Method {
 	case "GET":
 		fmt.Fprintln(w, "in GET")
 
-		res := h.produceGetter.GetProduce()
+		produce := h.produceGetter.GetProduce()
+		res := GetProduceResponse{produce}
 		if jsn, err := json.Marshal(res); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
-			w.WriteHeader(http.StatusOK)
 			w.Write(jsn)
 		}
 
 	case "POST":
 		fmt.Fprintln(w, "in POST")
 
-		body := PostProduceRequestBody{}
+		body := PostProduceRequest{}
 		getBody(w, r, body)
 
 		//TODO check format of produce items in body
@@ -50,14 +49,13 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 		if jsn, err := json.Marshal(res); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
-			w.WriteHeader(http.StatusOK)
 			w.Write(jsn)
 		}
 
 	case "DELETE":
 		fmt.Fprintln(w, "in DELETE")
 
-		body := DeleteProduceRequestBody{}
+		body := DeleteProduceRequest{}
 		getBody(w, r, body)
 
 		//TODO check format of produce code in body
@@ -68,7 +66,6 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 		if jsn, err := json.Marshal(response); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 		} else {
-			w.WriteHeader(http.StatusOK)
 			w.Write(jsn)
 		}
 

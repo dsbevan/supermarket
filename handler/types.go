@@ -2,11 +2,15 @@ package handler
 
 import . "supermarket/types"
 
-type PostProduceRequestBody struct {
+type GetProduceResponse struct {
 	Produce []ProduceItem `json:"produce"`
 }
 
-type DeleteProduceRequestBody struct {
+type PostProduceRequest struct {
+	Produce []ProduceItem `json:"produce"`
+}
+
+type DeleteProduceRequest struct {
 	Code string `json:"code"`
 }
 
