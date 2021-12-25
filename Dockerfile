@@ -21,3 +21,4 @@ COPY --from=build /go/src/config.json .
 # Configure
 EXPOSE 8080
 ENTRYPOINT ./supermarket
+
