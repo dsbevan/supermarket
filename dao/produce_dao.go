@@ -45,7 +45,7 @@ func (d *ProduceDao) PostProduce(item ProduceItem) bool {
 	d.mu.Lock()
 	defer d.mu.Unlock()
 
-	if contains(*d.produce, &item) == -1 {
+	if containsCode(*d.produce, item.Code) == -1 {
 		*d.produce = append(*d.produce, item)
 		return true
 	}
