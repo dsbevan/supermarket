@@ -9,8 +9,7 @@ The project can be build using the provided Dockerfile. The image can also be pu
 The application is configured using the config file "config.json". An existing image can be configured by mounting a new config.json file with custom values onto the image at /root/config.json.  This file is loaded and validated when the image is run.
 
 ## API Documentation
-Produce Items
-***
+#### Produce Items
 Produce items have the following format:
 ```
 {
@@ -27,7 +26,7 @@ Produce codes are alphanumeric, case insensitive, and have the following format:
 
 Produce prices are represented using floating-point values and may contain up to two decimal places.
 
-
+***
 ### API Methods
 
 #### GET
