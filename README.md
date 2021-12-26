@@ -4,9 +4,15 @@
 The supermarket api allows a user to GET from, POST to, and DELETE from an in-memory database of produce items. Produce items each consist of a name, a produce code, and a unit price.
 
 ## Installation
-The project can be build using the provided Dockerfile. The image can also be pulled from hub.docker.com/dsbevan/supermarket. Each image is tagged with the commit hash of the code version used to build the image. The latest image is tagged "latest".
+Ensure Docker is installed on your system.
+The project can be built using the provided Dockerfile. The image can also be pulled from hub.docker.com/dsbevan/supermarket. Each image is tagged with the commit hash of the code version used to build the image. The latest image is tagged "latest".
 
 The application is configured using the config file "config.json". An existing image can be configured by mounting a new config.json file with custom values onto the image at /root/config.json.  This file is loaded and validated when the image is run.
+
+By default, the api listens for connections on port 8080 inside the container. The following command will run the container locally, make it available at `http://localhost:8080/supermarket/produce`, and remove it when it exits:
+```
+docker run --rm -p 8080:8080 dsbevan/supermarket
+```
 
 ## API Documentation
 #### Produce Items
