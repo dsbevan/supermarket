@@ -41,21 +41,25 @@ func (m *MockProduceGetter) GetProduce() []ProduceItem {
 
 func TestServiceGetProduce(t *testing.T) {
 	testcases := []struct {
+		name         string
 		mockResponse []ProduceItem
 		expected     []ProduceItem
 		errs         error
 	}{
-		{ // Simple test
+		{
+			name:         "Simple test",
 			mockResponse: []ProduceItem{apple},
 			expected:     []ProduceItem{apple},
 			errs:         nil,
 		},
-		{ // More items
+		{
+			name:         "More items",
 			mockResponse: []ProduceItem{apple, orange, pear},
 			expected:     []ProduceItem{pear, apple, orange}, // Different order
 			errs:         nil,
 		},
-		{ // Empty db test
+		{
+			name:         "Empty db test",
 			mockResponse: []ProduceItem{},
 			expected:     []ProduceItem{},
 			errs:         nil,
@@ -69,7 +73,10 @@ func TestServiceGetProduce(t *testing.T) {
 		result := svc.GetProduce()
 		equal, msg := testutils.Equivalent(result, test.expected)
 		if !equal {
+			t.Errorf("%s", test.name)
 			t.Errorf("Expected and actual %s", msg)
+			t.Errorf("Expected: %v", test.expected)
+			t.Errorf("Actual: %v", result)
 			t.Fail()
 		}
 	}
@@ -100,36 +107,42 @@ func (m *MockProducePoster) PostProduce(item ProduceItem) bool {
 
 func TestServicePostProduce(t *testing.T) {
 	testcases := []struct {
+		name          string
 		mockResponse  []bool
 		arg           []ProduceItem
 		expected      []ProduceItem
 		checkContents bool
 	}{
-		{ // Single object successful post
+		{
+			name:          "Single object successful post",
 			mockResponse:  []bool{true},
 			arg:           []ProduceItem{apple},
 			expected:      []ProduceItem{apple},
 			checkContents: true,
 		},
-		{ // Single object unsuccessful post
+		{
+			name:          "Single object unsuccessful post",
 			mockResponse:  []bool{false},
 			arg:           []ProduceItem{apple},
 			expected:      []ProduceItem{},
 			checkContents: true,
 		},
-		{ // Multiple objects successful post
+		{
+			name:          "Multiple objects successful post",
 			mockResponse:  []bool{true, true, true},
 			arg:           []ProduceItem{apple, pear, orange},
 			expected:      []ProduceItem{apple, pear, orange},
 			checkContents: true,
 		},
-		{ // Multiple objects unsuccessful post
+		{
+			name:          "Multiple objects unsuccessful post",
 			mockResponse:  []bool{false, false, false},
 			arg:           []ProduceItem{apple, pear, orange},
 			expected:      []ProduceItem{},
 			checkContents: true,
 		},
-		{ // Multiple objects one failure
+		{
+			name:          "Multiple objects one failure",
 			mockResponse:  []bool{true, false, true},
 			arg:           []ProduceItem{apple, pear, orange},
 			expected:      []ProduceItem{apple, orange}, //is usually pear, orange
@@ -153,7 +166,10 @@ func TestServicePostProduce(t *testing.T) {
 		if test.checkContents {
 			equal, msg := testutils.Equivalent(result, test.expected)
 			if !equal {
+				t.Errorf("%s", test.name)
 				t.Errorf("Expected and actual %s", msg)
+				t.Errorf("Expected: %v", test.expected)
+				t.Errorf("Actual: %v", result)
 				t.Fail()
 			}
 		}
@@ -177,16 +193,19 @@ func (m *MockProduceDeleter) DeleteProduce(code string) bool {
 
 func TestServiceDeleteProduce(t *testing.T) {
 	testcases := []struct {
+		name         string
 		mockResponse bool
 		arg          string
 		expected     bool
 	}{
-		{ // Successful test
+		{
+			name:         "Successful test",
 			mockResponse: true,
 			arg:          "3434-3333-4444-4343",
 			expected:     true,
 		},
-		{ // Unsuccessful test
+		{
+			name:         "Unsuccessful test",
 			mockResponse: false,
 			arg:          "3434-3333-4444-4343",
 			expected:     false,
@@ -199,7 +218,10 @@ func TestServiceDeleteProduce(t *testing.T) {
 
 		result := svc.DeleteProduce(test.arg)
 		if result != test.expected {
+			t.Errorf("%s", test.name)
 			t.Errorf("TestServiceDeleteProduce: Result does not match expected result")
+			t.Errorf("Expected: %v", test.expected)
+			t.Errorf("Actual: %v", result)
 			t.Fail()
 		}
 	}
