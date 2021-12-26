@@ -28,11 +28,9 @@ Produce codes are alphanumeric, case insensitive, and have the following format:
 Produce prices are represented using floating-point values and may contain up to two decimal places.
 
 
-API Methods
-***
+### API Methods
 
-GET
-***
+#### GET
 Get returns a json array of all the produce items in the database.
 
 Example request url:
@@ -68,8 +66,7 @@ Example response body:
 }
 ```
 
-POST
-***
+#### POST
 Post allows a user to add items to the database. One or more items may be added at a time. If any item is invalid, the request is rejected and the server responds with a 400 response code. When a POST request is successfully processed, an array of all items successfully added to the database is returned. Any item included in a request but not the response was not added to the database.
 
 Example request url and requst body:
@@ -115,12 +112,13 @@ Example request response:
 }
 ```
  
-DELETE
-***
+#### DELETE
 Delete deletes the item with the matching code (case insensitive) from the database, if it exists. The code is passed using the url parameter `Produce Code`.
 
 Example request url:
-`http://<domain>/supermarket/produce?Produce+Code=E5T6-9UI3-TH15-QR88`
+```
+http://<domain>/supermarket/produce?Produce+Code=E5T6-9UI3-TH15-QR88
+```
 
 Example response body:
 ```
