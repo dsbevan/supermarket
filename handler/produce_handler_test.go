@@ -47,6 +47,11 @@ var invalidName ProduceItem = ProduceItem{
 	Code:  "8888-AAAA-BBBB-OOOO",
 	Price: 2.99,
 }
+var noName ProduceItem = ProduceItem{
+	Name:  "", //Invalid
+	Code:  "888a-AAAA-BBBB-OOOO",
+	Price: 2.99,
+}
 var nonAlphaCode ProduceItem = ProduceItem{
 	Name:  "orange",
 	Code:  "8888-AAAA-B/BB-OOOO", //Invalid
@@ -55,6 +60,11 @@ var nonAlphaCode ProduceItem = ProduceItem{
 var extraSet ProduceItem = ProduceItem{
 	Name:  "orange",
 	Code:  "8888-AAAA-BBBB-OOOO-3333", //Invalid
+	Price: 2.99,
+}
+var noCode ProduceItem = ProduceItem{
+	Name:  "orange",
+	Code:  "", //Invalid
 	Price: 2.99,
 }
 var extraDigit ProduceItem = ProduceItem{
@@ -249,7 +259,7 @@ func TestHandlePost(t *testing.T) {
 		{
 			name:           "Test valid produce name with numbers",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, numName}})), //Name with nums
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, numName}})),
 			producePoster:  MockProducePoster{[]ProduceItem{apple, numName}},
 			expected:       []ProduceItem{apple, numName},
 			expectedCode:   200,
@@ -257,8 +267,16 @@ func TestHandlePost(t *testing.T) {
 		{
 			name:           "Test invalid name",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, invalidName}})), //Invalid name
-			producePoster:  MockProducePoster{[]ProduceItem{apple}},                                                       // Unused
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, invalidName}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
+		},
+		{
+			name:           "Test no name",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, noName}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
 			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
 		},
@@ -273,16 +291,16 @@ func TestHandlePost(t *testing.T) {
 		{
 			name:           "Test invalid produce code missing char",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, missingChar}})), //missingChar
-			producePoster:  MockProducePoster{[]ProduceItem{apple, pear}},                                                 // Unused
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, missingChar}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple, pear}}, // Unused
 			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
 		},
 		{
 			name:           "Test invalid produce code missing dash",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
-			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, missingDash}})), //missingChar
-			producePoster:  MockProducePoster{[]ProduceItem{apple}},                                                       // Unused
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{apple, missingDash}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
 			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
 		},
@@ -298,6 +316,14 @@ func TestHandlePost(t *testing.T) {
 			name:           "Test extra code set",
 			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
 			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{extraSet}})),
+			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
+			expected:       []ProduceItem{},
+			expectedCode:   400, // Bad request
+		},
+		{
+			name:           "Test empty code",
+			responseWriter: MockWriter{buffer: new([]byte), statusCode: new(int)},
+			request:        makeHttpRequest("POST", jsonBodyBytes(PostProduceRequest{[]ProduceItem{noCode}})),
 			producePoster:  MockProducePoster{[]ProduceItem{apple}}, // Unused
 			expected:       []ProduceItem{},
 			expectedCode:   400, // Bad request
