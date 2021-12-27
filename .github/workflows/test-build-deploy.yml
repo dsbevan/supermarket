@@ -52,19 +52,19 @@ jobs:
         env:
           REGISTRY_NAME: dsbevan/supermarket-develop
         run: |
-          docker image tag supermarket:$GITHUB_SHA env.REGISTRY_NAME:$GITHUB_SHA
-          docker image push env.REIGSTRY_NAME:$GITHUB_SHA
-          docker image tag supermarket:$GITHUB_SHA env.REIGSTRY_NAME:latest
-          docker image push env.REIGSTRY_NAME:latest
+          docker image tag supermarket:$GITHUB_SHA $REGISTRY_NAME:$GITHUB_SHA
+          docker image push $REIGSTRY_NAME:$GITHUB_SHA
+          docker image tag supermarket:$GITHUB_SHA $REIGSTRY_NAME:latest
+          docker image push $REIGSTRY_NAME:latest
       - name: Push production image
         if: github.ref_name == 'main'
         env:
           REGISTRY_NAME: dsbevan/supermarket
         run: |
-          docker image tag supermarket:$GITHUB_SHA env.REGISTRY_NAME:$GITHUB_SHA
-          docker image push env.REIGSTRY_NAME:$GITHUB_SHA
-          docker image tag supermarket:$GITHUB_SHA env.REIGSTRY_NAME:latest
-          docker image push env.REIGSTRY_NAME:latest
+          docker image tag supermarket:$GITHUB_SHA $REGISTRY_NAME:$GITHUB_SHA
+          docker image push $REIGSTRY_NAME:$GITHUB_SHA
+          docker image tag supermarket:$GITHUB_SHA $REIGSTRY_NAME:latest
+          docker image push $REIGSTRY_NAME:latest
 
   deploy:
     needs:
