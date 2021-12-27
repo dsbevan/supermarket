@@ -5,7 +5,7 @@ The supermarket api allows a user to GET from, POST to, and DELETE from an in-me
 
 ## Installation
 Ensure Docker is installed on your system.
-The project can be built using the provided Dockerfile. The image can also be pulled from hub.docker.com/dsbevan/supermarket. Each image is tagged with the commit hash of the code version used to build the image. The latest image is tagged "latest".
+The project can be built using the provided Dockerfile. The image `dsbevan/supermarket` can also be pulled from Docker Hub. Builds of the `develop` branch are available at `dsbevan/supermarket-develop`. Each image is tagged with the commit hash of the code version used to build the image.
 
 The application is configured using the config file "config.json". An existing image can be configured by mounting a new config.json file with custom values onto the image at /root/config.json.  This file is loaded and validated when the image is run.
 
