@@ -5,11 +5,11 @@ The supermarket api allows a user to GET from, POST to, and DELETE from an in-me
 
 ## Installation
 Ensure Docker is installed on your system.
-The project can be built using the provided Dockerfile. The image `dsbevan/supermarket` can also be pulled from Docker Hub. Builds of the `develop` branch are available at `dsbevan/supermarket-develop`. Each image is tagged with the commit hash of the code version used to build the image.
+The project can be built using the provided Dockerfile. Builds of the main branch are also available on Docker Hub at `dsbevan/supermarket`. Builds of the `develop` branch are available at `dsbevan/supermarket-develop`. Each image is tagged with the commit hash of the code version used to build the image.
 
 The application is configured using the config file "config.json". An existing image can be configured by mounting a new config.json file with custom values onto the image at /root/config.json.  This file is loaded and validated when the image is run.
 
-By default, the api listens for connections on port 8080 inside the container. The following command will run the container locally, make it available at `http://localhost:8080/supermarket/produce`, and remove it when it exits:
+By default, the api listens for connections on port 8080 inside the container. The following command will run the container locally (pulling if it has not been pulled), listen for requests at `http://localhost:8080/supermarket/produce`, and remove the container when the process exits:
 ```
 docker run --rm -p 8080:8080 dsbevan/supermarket
 ```
