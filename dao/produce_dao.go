@@ -46,6 +46,8 @@ func (d *ProduceDao) PostProduce(item ProduceItem) bool {
 	defer d.mu.Unlock()
 
 	if containsCode(*d.produce, item.Code) == -1 {
+		// Format
+		item.Code = strings.ToUpper(item.Code)
 		*d.produce = append(*d.produce, item)
 		return true
 	}

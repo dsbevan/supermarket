@@ -7,6 +7,11 @@ import (
 )
 
 // Test data
+var lowerApple ProduceItem = ProduceItem{
+	Name:  "apple",
+	Code:  "sn3j-3398-2222-1111",
+	Price: 12.30,
+}
 var apple ProduceItem = ProduceItem{
 	Name:  "apple",
 	Code:  "SN3J-3398-2222-1111",
@@ -115,6 +120,12 @@ func TestDaoPostProduce(t *testing.T) {
 			initialContents: partiallyFullSlice,
 			itemToAdd:       apple,
 			expected:        []ProduceItem{apple, pear},
+		},
+		{
+			name:            "Test case insensitivity",
+			initialContents: []ProduceItem{},
+			itemToAdd:       lowerApple,           // Insert lowercase
+			expected:        []ProduceItem{apple}, // Contains uppercase
 		},
 	}
 

@@ -2,7 +2,9 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+	"os"
 	"supermarket/service"
 	"supermarket/types"
 )
@@ -43,7 +45,7 @@ func (h *ProduceHandler) HandleProduce(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Validate request values
+		// Validate and format request values
 		for _, item := range body.Produce {
 			if !types.ValidItem(item) {
 				badRequest(w, "Invalid code, name, or price format")
@@ -101,8 +103,9 @@ func getBody(w http.ResponseWriter, r *http.Request, bodyObjectPointer interface
 		return false
 	}
 	b := make([]byte, 2048, 2048)
-	if bytesRead, err := r.Body.Read(b); err != nil {
+	if bytesRead, err := r.Body.Read(b); err != nil && bytesRead == 0 {
 		// Error reading body
+		fmt.Fprintln(os.Stderr, err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return false
 	} else {
