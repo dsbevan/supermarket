@@ -2,7 +2,7 @@ name: test-build-deploy
 on:
   push:
     branches:
-      - $default-branch
+      - main
       - develop
     paths:
       - '**.go'
@@ -11,7 +11,7 @@ on:
       - 'Dockerfile'
   pull_request:
     branches:
-      - $default-branch
+      - main
       - develop
     paths:
       - '**.go'
