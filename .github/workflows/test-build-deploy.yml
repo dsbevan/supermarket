@@ -1,23 +1,15 @@
 name: test-build-deploy
 
-.image-push-script: &image-push-script |
-  docker image tag supermarket:$GITHUB_SHA env.REGISTRY_NAME:$GITHUB_SHA
-  docker image push env.REIGSTRY_NAME:$GITHUB_SHA
-  docker image tag supermarket:$GITHUB_SHA env.REIGSTRY_NAME:latest
-  docker image push env.REIGSTRY_NAME:latest
-
-.run-on-conditions: &run-on-conditions
-  branches:
-    - develop
-    - main
-  paths:
-    - '**.go'
-    - '.github/**'
-    - 'config.json'
-    - 'Dockerfile'
-
 on:
-  push: *run-on-conditions
+  push: &run-on-conditions
+    branches:
+      - develop
+      - main
+    paths:
+      - '**.go'
+      - '.github/**'
+      - 'config.json'
+      - 'Dockerfile'
   pull_request: *run-on-conditions
 
 jobs:
@@ -51,12 +43,16 @@ jobs:
         if: github.ref_name == 'develop'
         env:
           REGISTRY_NAME: dsbevan/supermarket-develop
-        run: *image-push-script
+        run: &push-image |
+          docker image tag supermarket:$GITHUB_SHA env.REGISTRY_NAME:$GITHUB_SHA
+          docker image push env.REIGSTRY_NAME:$GITHUB_SHA
+          docker image tag supermarket:$GITHUB_SHA env.REIGSTRY_NAME:latest
+          docker image push env.REIGSTRY_NAME:latest
       - name: Push production image
         if: github.ref_name == 'main'
         env:
           REGISTRY_NAME: dsbevan/supermarket
-        run: *image-push-script
+        run: *push-image
 
   deploy:
     needs:
