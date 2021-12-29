@@ -25,10 +25,11 @@ Produce items have the following format:
 }
 ```
 
-Produce names are alphanumeric, case insensitive, and may contain spaces, but cannot start with a space.
+Produce names are alphanumeric, case insensitive, and may contain spaces, but cannot start with a space. Duplicate names are allowed.
 
 Produce codes are alphanumeric, case insensitive, and have the following format: Four sets of for characters, each separated by a dash ('-'). Ex (Where each '#' represents a character):
 `####-####-####-####`
+Produce codes must be unique.
 
 Produce prices are represented using floating-point values and may contain up to two decimal places.
 
